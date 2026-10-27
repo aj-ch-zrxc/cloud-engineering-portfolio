@@ -10,7 +10,6 @@ A serverless invoice processing application that extracts structured information
 
 - **Architecture:** Serverless
 - **Tech stack:** React, AWS Amplify, Cognito, API Gateway, Lambda, S3, Textract, DynamoDB
-- **GitHub:** [View repository](https://github.com/aj-ch-zrxc/BillMind)
 
 ### 2. AWS Resource & Cost Monitor (RCM)
 
@@ -18,7 +17,6 @@ A web application for monitoring AWS resources, reviewing actual cloud spending,
 
 - **Architecture:** Serverless backend with a React frontend
 - **Tech stack:** React, Vite, AWS Lambda, API Gateway, DynamoDB, Cognito, Cost Explorer
-- **GitHub:** [View repository](https://github.com/aj-ch-zrxc/AWS_RCM) *(Private repository)*
 
 ---
 
