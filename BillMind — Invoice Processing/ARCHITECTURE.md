@@ -4,57 +4,41 @@
 
 BillMind is documented as a serverless invoice-processing application deployed in AWS Region `ap-south-1`. The React single-page application uses AWS Amplify Auth for Cognito authentication. Requests pass through an API Gateway HTTP API to Lambda, which coordinates storage, text extraction, and database operations.
 
-## Architecture diagram
+## Architecture
 
-```text
-                         ┌──────────────────────────┐
-                         │       User Browser       │
-                         │      React SPA           │
-                         │   AWS Amplify Auth       │
-                         └────────────┬─────────────┘
-                                      │ HTTPS + Cognito JWT
-                                      ▼
-                         ┌──────────────────────────┐
-                         │ Amazon API Gateway       │
-                         │ HTTP API · ap-south-1    │
-                         │ JWT authorizer (as       │
-                         │ documented in notes)     │
-                         └────────────┬─────────────┘
-                                      │ Lambda proxy
-                                      ▼
-                         ┌──────────────────────────┐
-                         │ AWS Lambda               │
-                         │ billmind-invoice-processor│
-                         │ Upload + invoice CRUD    │
-                         └───────┬─────────┬────────┘
-                                 │         │
-                      Put/Delete │         │ AnalyzeDocument
-                                 ▼         ▼
-                      ┌────────────────┐ ┌─────────────────┐
-                      │ Amazon S3      │ │ Amazon Textract │
-                      │ Invoice files  │ │ FORMS extraction│
-                      │ AES256 noted   │ └────────┬────────┘
-                      └────────────────┘          │ extracted
-                                                  │ blocks
-                                                  ▼
-                                       ┌─────────────────────┐
-                                       │ Lambda normalization│
-                                       │ common invoice fields│
-                                       └──────────┬──────────┘
-                                                  │ Put/Get/Update/
-                                                  │ Delete/Query
-                                                  ▼
-                                       ┌─────────────────────┐
-                                       │ Amazon DynamoDB     │
-                                       │ billmind-invoices   │
-                                       │ userId + invoiceId  │
-                                       └─────────────────────┘
+```mermaid
+flowchart TD
+    A["User Browser<br/>React SPA<br/>AWS Amplify Auth"]
+    B["Amazon API Gateway<br/>HTTP API<br/>JWT authorizer"]
+    C["AWS Lambda<br/>billmind-invoice-processor<br/>Upload and invoice CRUD"]
+    D["Amazon S3<br/>Invoice files<br/>AES256 noted"]
+    E["Amazon Textract<br/>AnalyzeDocument<br/>FORMS extraction"]
+    F["Lambda normalization<br/>Common invoice fields"]
+    G[("Amazon DynamoDB<br/>billmind-invoices<br/>userId + invoiceId")]
+    H["Amazon Cognito<br/>Issues user JWTs"]
 
-                         Amazon Cognito
-                         Issues user JWTs;
-                         API Gateway validates them
-                         (confirm deployed settings).
+    A -->|"HTTPS + Cognito JWT"| B
+    B -->|"Lambda proxy integration"| C
+    C -->|"PutObject / DeleteObject"| D
+    C -->|"AnalyzeDocument"| E
+    E -->|"Extracted blocks"| F
+    F -->|"Put / Get / Update / Delete / Query"| G
+    H -.->|"Issues JWTs"| A
+    H -.->|"JWT validation configuration to verify"| B
+
+    classDef frontend fill:#e8f2ff,stroke:#3973ac,color:#172b4d
+    classDef compute fill:#f0eaff,stroke:#7952a8,color:#30204a
+    classDef storage fill:#e7f6ec,stroke:#378454,color:#183d27
+    classDef security fill:#fff2d8,stroke:#b98120,color:#50390d
+
+    class A frontend
+    class B,C,F compute
+    class D,E,G storage
+    class H security
 ```
+
+*Note: This diagram represents the architecture described in the project notes. The deployed API Gateway authorizer settings and other environment-specific configuration have not been independently verified.*
+
 
 ## Components
 
