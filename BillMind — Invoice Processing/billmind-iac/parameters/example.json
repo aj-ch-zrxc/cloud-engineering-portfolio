@@ -1,0 +1,46 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "test"
+  },
+  {
+    "ParameterKey": "ArtifactBucket",
+    "ParameterValue": "REPLACE_WITH_ARTIFACT_BUCKET"
+  },
+  {
+    "ParameterKey": "ArtifactPrefix",
+    "ParameterValue": "billmind"
+  },
+  {
+    "ParameterKey": "BillsTableName",
+    "ParameterValue": "billmind-bills"
+  },
+  {
+    "ParameterKey": "InvoicesTableName",
+    "ParameterValue": "billmind-invoices"
+  },
+  {
+    "ParameterKey": "InvoiceBucketName",
+    "ParameterValue": "REPLACE_WITH_AVAILABLE_INVOICE_BUCKET_NAME"
+  },
+  {
+    "ParameterKey": "UserPoolId",
+    "ParameterValue": "REPLACE_WITH_COGNITO_USER_POOL_ID"
+  },
+  {
+    "ParameterKey": "UserPoolClientId",
+    "ParameterValue": "REPLACE_WITH_COGNITO_APP_CLIENT_ID"
+  },
+  {
+    "ParameterKey": "BillsLambdaKey",
+    "ParameterValue": "lambda/billmind-bills-api.zip"
+  },
+  {
+    "ParameterKey": "InvoiceLambdaKey",
+    "ParameterValue": "lambda/billmind-invoice-processor.zip"
+  },
+  {
+    "ParameterKey": "FrontendOrigin",
+    "ParameterValue": "https://REPLACE_WITH_FRONTEND_ORIGIN"
+  }
+]

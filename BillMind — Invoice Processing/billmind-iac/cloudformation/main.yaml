@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: BillMind V1 root stack.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: test
+    AllowedValues: [test, dev, prod]
+  ArtifactBucket:
+    Type: String
+  ArtifactPrefix:
+    Type: String
+    Default: billmind
+  BillsTableName:
+    Type: String
+    Default: billmind-bills
+  InvoicesTableName:
+    Type: String
+    Default: billmind-invoices
+  InvoiceBucketName:
+    Type: String
+  UserPoolId:
+    Type: String
+  UserPoolClientId:
+    Type: String
+  BillsLambdaKey:
+    Type: String
+  InvoiceLambdaKey:
+    Type: String
+  FrontendOrigin:
+    Type: String
+
+Resources:
+  DataStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/dynamodb.yaml
+      Parameters:
+        Environment: !Ref Environment
+        BillsTableName: !Ref BillsTableName
+        InvoicesTableName: !Ref InvoicesTableName
+
+  StorageStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/storage.yaml
+      Parameters:
+        Environment: !Ref Environment
+        InvoiceBucketName: !Ref InvoiceBucketName
+
+  ApiStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [DataStack, StorageStack]
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/api.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ArtifactBucket: !Ref ArtifactBucket
+        BillsLambdaKey: !Ref BillsLambdaKey
+        InvoiceLambdaKey: !Ref InvoiceLambdaKey
+        BillsTableName: !Ref BillsTableName
+        InvoicesTableName: !Ref InvoicesTableName
+        InvoiceBucketName: !Ref InvoiceBucketName
+        UserPoolId: !Ref UserPoolId
+        UserPoolClientId: !Ref UserPoolClientId
+        FrontendOrigin: !Ref FrontendOrigin
+
+Outputs:
+  ApiEndpoint:
+    Description: BillMind API base URL.
+    Value: !GetAtt ApiStack.Outputs.ApiEndpoint

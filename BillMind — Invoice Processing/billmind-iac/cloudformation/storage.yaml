@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Private storage for BillMind invoice documents.
+
+Parameters:
+  Environment:
+    Type: String
+  InvoiceBucketName:
+    Type: String
+
+Resources:
+  InvoiceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref InvoiceBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Application
+          Value: BillMind
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  InvoiceBucketName:
+    Value: !Ref InvoiceBucket
+  InvoiceBucketArn:
+    Value: !GetAtt InvoiceBucket.Arn
