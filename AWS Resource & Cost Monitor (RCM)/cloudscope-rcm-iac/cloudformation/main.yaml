@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudScope RCM root stack. Coordinates data, IAM, Lambda, API Gateway, and scheduled scanning.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: test
+    AllowedValues: [test, dev, prod]
+  ArtifactBucket:
+    Type: String
+    Description: External bucket used to distribute nested templates and Lambda ZIPs.
+  ArtifactPrefix:
+    Type: String
+    Default: cloudscope
+  ResourcesTableName:
+    Type: String
+    Default: aws-rcm-resources
+  ScanResultsTableName:
+    Type: String
+    Default: aws-rcm-scan-results
+  UserSettingsTableName:
+    Type: String
+    Default: aws-rcm-user-settings
+  CreditDataTableName:
+    Type: String
+    Default: aws-rcm-credit-data
+  LambdaCodePrefix:
+    Type: String
+    Default: lambda
+  ScheduleExpression:
+    Type: String
+    Default: rate(1 day)
+
+Resources:
+  DataStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/dynamodb.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ResourcesTableName: !Ref ResourcesTableName
+        ScanResultsTableName: !Ref ScanResultsTableName
+        UserSettingsTableName: !Ref UserSettingsTableName
+        CreditDataTableName: !Ref CreditDataTableName
+
+  IamStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/iam.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ResourcesTableName: !Ref ResourcesTableName
+        ScanResultsTableName: !Ref ScanResultsTableName
+        UserSettingsTableName: !Ref UserSettingsTableName
+        CreditDataTableName: !Ref CreditDataTableName
+
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [DataStack, IamStack]
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/lambda.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ArtifactBucket: !Ref ArtifactBucket
+        LambdaCodePrefix: !Ref LambdaCodePrefix
+        ResourcesTableName: !Ref ResourcesTableName
+        ScanResultsTableName: !Ref ScanResultsTableName
+        UserSettingsTableName: !Ref UserSettingsTableName
+        CreditDataTableName: !Ref CreditDataTableName
+
+  ApiStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: LambdaStack
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/apigateway.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ResourcesFunctionArn: !GetAtt LambdaStack.Outputs.ResourcesFunctionArn
+        ScanResultsFunctionArn: !GetAtt LambdaStack.Outputs.ScanResultsFunctionArn
+        ArtifactPrefix: !Ref ArtifactPrefix
+
+  ScheduleStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: LambdaStack
+    Properties:
+      TemplateURL: !Sub https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com/${ArtifactPrefix}/eventbridge.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ScheduleExpression: !Ref ScheduleExpression
+        ScannerFunctionArn: !GetAtt LambdaStack.Outputs.ScannerFunctionArn
+
+Outputs:
+  Environment:
+    Value: !Ref Environment

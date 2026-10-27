@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudScope RCM Lambda functions.
+
+Parameters:
+  Environment:
+    Type: String
+  ArtifactBucket:
+    Type: String
+  LambdaCodePrefix:
+    Type: String
+  ResourcesTableName:
+    Type: String
+  ScanResultsTableName:
+    Type: String
+  UserSettingsTableName:
+    Type: String
+  CreditDataTableName:
+    Type: String
+
+Resources:
+  ScannerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub aws-rcm-scanner-${Environment}
+      Runtime: python3.12
+      Handler: lambda_function.lambda_handler
+      Role: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudscope-${Environment}-scanner-role
+      Timeout: 120
+      MemorySize: 256
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Sub ${LambdaCodePrefix}/aws-rcm-scanner.zip
+      Environment:
+        Variables:
+          RESOURCES_TABLE: !Ref ResourcesTableName
+          SCAN_RESULTS_TABLE: !Ref ScanResultsTableName
+          CREDIT_DATA_TABLE: !Ref CreditDataTableName
+          AWS_REGION_NAME: !Ref AWS::Region
+
+  ResourcesFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub aws-rcm-get-resources-${Environment}
+      Runtime: python3.12
+      Handler: lambda_function.lambda_handler
+      Role: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudscope-${Environment}-api-role
+      Timeout: 30
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Sub ${LambdaCodePrefix}/aws-rcm-get-resources.zip
+      Environment:
+        Variables:
+          RESOURCES_TABLE: !Ref ResourcesTableName
+          SCAN_RESULTS_TABLE: !Ref ScanResultsTableName
+
+  ScanResultsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub aws-rcm-get-scan-results-${Environment}
+      Runtime: python3.12
+      Handler: lambda_function.lambda_handler
+      Role: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudscope-${Environment}-api-role
+      Timeout: 30
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Sub ${LambdaCodePrefix}/aws-rcm-get-scan-results.zip
+      Environment:
+        Variables:
+          SCAN_RESULTS_TABLE: !Ref ScanResultsTableName
+
+  UserSettingsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub aws-rcm-user-settings-${Environment}
+      Runtime: python3.12
+      Handler: lambda_function.lambda_handler
+      Role: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudscope-${Environment}-api-role
+      Timeout: 30
+      MemorySize: 128
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Sub ${LambdaCodePrefix}/aws-rcm-user-settings.zip
+      Environment:
+        Variables:
+          USER_SETTINGS_TABLE: !Ref UserSettingsTableName
+
+Outputs:
+  ScannerFunctionArn:
+    Value: !GetAtt ScannerFunction.Arn
+  ResourcesFunctionArn:
+    Value: !GetAtt ResourcesFunction.Arn
+  ScanResultsFunctionArn:
+    Value: !GetAtt ScanResultsFunction.Arn
+  UserSettingsFunctionArn:
+    Value: !GetAtt UserSettingsFunction.Arn

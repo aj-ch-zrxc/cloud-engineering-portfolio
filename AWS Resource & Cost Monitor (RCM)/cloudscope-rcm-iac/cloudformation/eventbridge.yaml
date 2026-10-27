@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudScope RCM scheduled scanner trigger.
+
+Parameters:
+  Environment:
+    Type: String
+  ScheduleExpression:
+    Type: String
+  ScannerFunctionArn:
+    Type: String
+
+Resources:
+  ScannerSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub aws-rcm-scanner-schedule-${Environment}
+      Description: Scheduled CloudScope resource and cost scan.
+      ScheduleExpression: !Ref ScheduleExpression
+      State: ENABLED
+      Targets:
+        - Id: ScannerLambda
+          Arn: !Ref ScannerFunctionArn
+
+  ScannerInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ScannerFunctionArn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt ScannerSchedule.Arn

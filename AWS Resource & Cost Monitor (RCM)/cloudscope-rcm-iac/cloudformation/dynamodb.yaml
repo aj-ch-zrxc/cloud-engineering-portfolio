@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudScope RCM DynamoDB tables.
+
+Parameters:
+  Environment:
+    Type: String
+  ResourcesTableName:
+    Type: String
+  ScanResultsTableName:
+    Type: String
+  UserSettingsTableName:
+    Type: String
+  CreditDataTableName:
+    Type: String
+
+Resources:
+  ResourcesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref ResourcesTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: resource_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: resource_id
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      Tags: [{Key: Application, Value: CloudScopeRCM}, {Key: Environment, Value: !Ref Environment}]
+  ScanResultsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref ScanResultsTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: scan_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: scan_id
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      Tags: [{Key: Application, Value: CloudScopeRCM}, {Key: Environment, Value: !Ref Environment}]
+  UserSettingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref UserSettingsTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      Tags: [{Key: Application, Value: CloudScopeRCM}, {Key: Environment, Value: !Ref Environment}]
+  CreditDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref CreditDataTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+      Tags: [{Key: Application, Value: CloudScopeRCM}, {Key: Environment, Value: !Ref Environment}]
+
+Outputs:
+  ResourcesTableName:
+    Value: !Ref ResourcesTable
+  ScanResultsTableName:
+    Value: !Ref ScanResultsTable
+  UserSettingsTableName:
+    Value: !Ref UserSettingsTable
+  CreditDataTableName:
+    Value: !Ref CreditDataTable

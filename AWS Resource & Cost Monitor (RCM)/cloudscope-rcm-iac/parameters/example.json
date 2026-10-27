@@ -1,0 +1,38 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "test"
+  },
+  {
+    "ParameterKey": "ArtifactBucket",
+    "ParameterValue": "REPLACE_WITH_ARTIFACT_BUCKET"
+  },
+  {
+    "ParameterKey": "ArtifactPrefix",
+    "ParameterValue": "cloudscope"
+  },
+  {
+    "ParameterKey": "ResourcesTableName",
+    "ParameterValue": "aws-rcm-resources"
+  },
+  {
+    "ParameterKey": "ScanResultsTableName",
+    "ParameterValue": "aws-rcm-scan-results"
+  },
+  {
+    "ParameterKey": "UserSettingsTableName",
+    "ParameterValue": "aws-rcm-user-settings"
+  },
+  {
+    "ParameterKey": "CreditDataTableName",
+    "ParameterValue": "aws-rcm-credit-data"
+  },
+  {
+    "ParameterKey": "LambdaCodePrefix",
+    "ParameterValue": "lambda"
+  },
+  {
+    "ParameterKey": "ScheduleExpression",
+    "ParameterValue": "rate(1 day)"
+  }
+]
