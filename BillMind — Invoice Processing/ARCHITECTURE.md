@@ -37,9 +37,6 @@ flowchart TD
     class H security
 ```
 
-*Note: This diagram represents the architecture described in the project notes. The deployed API Gateway authorizer settings and other environment-specific configuration have not been independently verified.*
-
-
 ## Components
 
 | Component | Responsibility |
